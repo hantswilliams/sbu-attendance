@@ -28,16 +28,26 @@
                 <video 
                     id="video" 
                     autoplay 
-                    class="rounded-lg border border-gray-300 shadow-sm"
+                    playsinline 
+                    class="rounded-lg border border-gray-300 shadow-sm hidden"
                 ></video>
                 <canvas id="canvas" class="hidden"></canvas>
             </div>
+
+            <!-- Enable Camera Button -->
+            <button 
+                type="button" 
+                id="enableCameraButton" 
+                class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-700 shadow-md transition duration-300"
+            >
+                Enable Camera
+            </button>
 
             <!-- Submit Button -->
             <button 
                 type="submit" 
                 id="submitButton" 
-                class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 shadow-md transition duration-300"
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 shadow-md transition duration-300 hidden"
             >
                 Capture and Submit
             </button>
@@ -49,11 +59,20 @@
         const canvas = document.getElementById('canvas');
         const context = canvas.getContext('2d');
         const photoForm = document.getElementById('photoForm');
+        const enableCameraButton = document.getElementById('enableCameraButton');
         const submitButton = document.getElementById('submitButton');
 
-        // Initialize video stream
-        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-            video.srcObject = stream;
+        // Handle enabling the camera
+        enableCameraButton.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                video.srcObject = stream;
+                video.classList.remove('hidden');
+                enableCameraButton.classList.add('hidden');
+                submitButton.classList.remove('hidden');
+            } catch (error) {
+                alert('Unable to access the camera. Please check your device settings.');
+            }
         });
 
         // Handle form submission (capture photo and submit)
