@@ -33,6 +33,7 @@ def upload():
     try:
         email = request.form.get('email')
         photo_data = request.form.get('photo')
+        ip_address = request.form.get('ip')
 
         if not email or not photo_data:
             return jsonify({"error": "Email and photo are required."}), 400
@@ -51,7 +52,8 @@ def upload():
                 {
                     "fields": {
                         "Email": email,
-                        "Photo": photo_url  # Now a plain string, not an attachment
+                        "Photo": photo_url,  # Now a plain string, not an attachment,
+                        "IP Address": ip_address
                     }
                 }
             ]
