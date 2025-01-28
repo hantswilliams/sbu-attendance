@@ -43,6 +43,12 @@
                 Enable Camera
             </button>
 
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="hidden flex items-center justify-center mt-6">
+                <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <span class="ml-2 text-gray-700 font-medium">Uploading...</span>
+            </div>
+
             <!-- Submit Button -->
             <button 
                 type="submit" 
@@ -51,6 +57,7 @@
             >
                 Capture and Submit
             </button>
+            
         </form>
     </div>
 
@@ -61,6 +68,7 @@
         const photoForm = document.getElementById('photoForm');
         const enableCameraButton = document.getElementById('enableCameraButton');
         const submitButton = document.getElementById('submitButton');
+        const loadingSpinner = document.getElementById('loadingSpinner');
 
         // Handle enabling the camera
         enableCameraButton.addEventListener('click', async () => {
@@ -79,29 +87,41 @@
         photoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Capture photo from video stream
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            // Show the loading spinner
+            loadingSpinner.classList.remove('hidden');
+            submitButton.disabled = true;
 
-            // Convert captured photo to Base64
-            const photoData = canvas.toDataURL('image/jpeg');
+            try {
+                // Capture photo from video stream
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            // Collect email and photo data
-            const email = document.getElementById('email').value;
-            const formData = new FormData();
-            formData.append('email', email);
-            formData.append('photo', photoData);
+                // Convert captured photo to Base64
+                const photoData = canvas.toDataURL('image/jpeg');
 
-            // Submit form data to the server
-            const response = await fetch('/upload', {
-                method: 'POST',
-                body: formData,
-            });
+                // Collect email and photo data
+                const email = document.getElementById('email').value;
+                const formData = new FormData();
+                formData.append('email', email);
+                formData.append('photo', photoData);
 
-            // Handle the response
-            const result = await response.json();
-            alert(result.message || result.error);
+                // Submit form data to the server
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                // Handle the response
+                const result = await response.json();
+                alert(result.message || result.error);
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+            } finally {
+                // Hide the loading spinner and re-enable the button
+                loadingSpinner.classList.add('hidden');
+                submitButton.disabled = false;
+            }
         });
     </script>
 </body>
