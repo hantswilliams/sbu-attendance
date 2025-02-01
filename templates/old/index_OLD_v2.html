@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance HAN462</title>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white shadow-lg rounded-lg p-6 w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center text-gray-700 mb-6">Attendance HAN462 - Beta</h1>
+        <form id="photoForm" class="space-y-4">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-600">SBU Email</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    required 
+                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+                    placeholder="Enter your email"
+                >
+            </div>
+
+            <div class="flex flex-col items-center">
+                <video 
+                    id="video" 
+                    autoplay 
+                    playsinline 
+                    class="rounded-lg border border-gray-300 shadow-sm hidden"
+                ></video>
+                <canvas id="canvas" class="hidden"></canvas>
+            </div>
+
+            <button 
+                type="button" 
+                id="enableCameraButton" 
+                class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-700 shadow-md transition duration-300"
+            >
+                Enable Camera
+            </button>
+
+            <div id="loadingSpinner" class="hidden flex items-center justify-center mt-6">
+                <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <span class="ml-2 text-gray-700 font-medium">Uploading...</span>
+            </div>
+
+            <button 
+                type="submit" 
+                id="submitButton" 
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 shadow-md transition duration-300 hidden"
+            >
+                Capture and Submit
+            </button>
+        </form>
+
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const photoForm = document.getElementById('photoForm');
+        const enableCameraButton = document.getElementById('enableCameraButton');
+        const submitButton = document.getElementById('submitButton');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        let userIP = '';
+
+        // Fetch the user's IP address
+        async function fetchIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                userIP = data.ip;
+            } catch (error) {
+                console.error('Failed to fetch IP address:', error);
+            }
+        }
+
+        // Fetch IP address on page load
+        fetchIP();
+
+        // Handle enabling the camera
+        enableCameraButton.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                video.srcObject = stream;
+                video.classList.remove('hidden');
+                enableCameraButton.classList.add('hidden');
+                submitButton.classList.remove('hidden');
+            } catch (error) {
+                alert('Unable to access the camera. Please check your device settings.');
+            }
+        });
+
+        // Handle form submission (capture photo and submit)
+        photoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Show the loading spinner
+            loadingSpinner.classList.remove('hidden');
+            submitButton.disabled = true;
+
+            try {
+                // Capture photo from video stream
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                // Convert captured photo to Base64
+                const photoData = canvas.toDataURL('image/jpeg');
+
+                // Collect email, photo data, and IP address
+                const email = document.getElementById('email').value;
+                const formData = new FormData();
+                formData.append('email', email);
+                formData.append('photo', photoData);
+                formData.append('ip', userIP);
+
+                // Submit form data to the server
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                // Handle the response
+                const result = await response.json();
+                alert(result.message || result.error);
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+            } finally {
+                // Hide the loading spinner and re-enable the button
+                loadingSpinner.classList.add('hidden');
+                submitButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
