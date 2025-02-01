@@ -34,6 +34,14 @@ def upload():
         email = request.form.get('email')
         photo_data = request.form.get('photo')
         ip_address = request.form.get('ip')
+        emotion = request.form.get('emotion', 'Unknown')  # Get emotion, default to 'Unknown'
+        emotion_confidence = request.form.get('emotion_confidence', 0)  # Get confidence, default to 0
+        age = request.form.get('age', 0)  # Get age, default to 0
+
+        print(f"📸 Received upload - Email: {email}, \
+                IP: {ip_address}, Emotion: {emotion}, \
+                Confidence: {emotion_confidence}, \
+                Age: {age}")
 
         if not email or not photo_data:
             return jsonify({"error": "Email and photo are required."}), 400
@@ -53,7 +61,10 @@ def upload():
                     "fields": {
                         "Email": email,
                         "Photo": photo_url,  # Now a plain string, not an attachment,
-                        "IP Address": ip_address
+                        "IP Address": ip_address,
+                        "Emotion": emotion,
+                        "Emotion Confidence": emotion_confidence,
+                        "Age": age
                     }
                 }
             ]
