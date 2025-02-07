@@ -48,9 +48,8 @@
 
         const human = new Human.Human(humanConfig);
         let video, canvas, context;
-        let enableCameraButton, submitButton, toggleDrawButton, loadingSpinner;
+        let enableCameraButton, submitButton, loadingSpinner;
         let userIP = '';
-        let drawEnabled = true;
 
         window.addEventListener('DOMContentLoaded', async () => {
             video = document.getElementById('video');
@@ -58,13 +57,11 @@
             context = canvas.getContext('2d');
             enableCameraButton = document.getElementById('enableCameraButton');
             submitButton = document.getElementById('submitButton');
-            toggleDrawButton = document.getElementById('toggleDrawButton');
             loadingSpinner = document.getElementById('loadingSpinner');
 
             await fetchIP();
 
             enableCameraButton.addEventListener('click', startVideo);
-            toggleDrawButton.addEventListener('click', toggleDraw);
             document.getElementById('photoForm').addEventListener('submit', captureAndSubmit);
         });
 
@@ -87,7 +84,6 @@
                 video.classList.remove('hidden');
                 enableCameraButton.classList.add('hidden');
                 submitButton.classList.remove('hidden');
-                toggleDrawButton.classList.remove('hidden');
 
                 console.log("🔄 Loading Human.js models...");
                 await human.load();
@@ -121,20 +117,13 @@
                 // Clear canvas before drawing
                 context.clearRect(0, 0, canvas.width, canvas.height);
 
-                if (drawEnabled) {
-                    // Draw the overlays on the canvas
-                    await human.draw.all(canvas, results);
-                }
+                // Draw the overlays on the canvas
+                await human.draw.all(canvas, results);
 
                 requestAnimationFrame(drawLoop); // Loop continuously
             } catch (error) {
                 console.error("❌ Error in draw loop:", error);
             }
-        }
-
-        function toggleDraw() {
-            drawEnabled = !drawEnabled;
-            toggleDrawButton.textContent = drawEnabled ? 'Disable Draw' : 'Enable Draw';
         }
 
         async function captureAndSubmit(e) {
@@ -143,6 +132,7 @@
             submitButton.disabled = true;
 
             try {
+
                 // Capture the emotion before submitting
                 const results = await human.detect(video);
 
@@ -232,14 +222,6 @@
                 class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-700 shadow-md transition duration-300"
             >
                 Enable Camera
-            </button>
-
-            <button 
-                type="button" 
-                id="toggleDrawButton" 
-                class="w-full bg-yellow-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-yellow-700 shadow-md transition duration-300 hidden"
-            >
-                Disable Draw
             </button>
 
             <div id="loadingSpinner" class="hidden flex items-center justify-center mt-6">
