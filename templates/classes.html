@@ -4,28 +4,38 @@
 
 {% block content %}
 
-<body class="bg-gray-100">
+<body class="bg-gradient-to-b from-gray-50 to-gray-200 min-h-screen flex items-center justify-center p-6">
 
     <!-- create div that is center horizontally-->
     <div class="flex items-center justify-center p-6">
 
-        <div class="w-full max-w-md p-4 bg-white rounded-lg shadow-md">
-            <h1 class="text-2xl font-bold mb-4">Classes</h1>
-            <input type="text" id="searchInput" placeholder="Search for classes..." class="mb-4 p-2 border border-gray-300 rounded-lg w-full">
-            <table id="classTable" class="min-w-full bg-white">
-                <thead>
-                    <tr>
-                        <th class="py-2 px-4 border-b">Class Name</th>
-                    </tr>
-                </thead>
-                <tbody id="class-list">
-                    <!-- List of classes will be added here -->
-                </tbody>
-            </table>
+        <div class="w-full max-w-lg bg-white p-6 rounded-xl shadow-lg ">
+            <h1 class="text-3xl font-semibold text-gray-800 mb-4 text-center">📚 Available Classes</h1>
+
+            <!-- Search Bar -->
+            <div class="mb-4">
+                <input type="text" id="searchInput" placeholder="🔍 Search classes..." 
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none">
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table id="classTable" class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-700">
+                            <th class="py-3 px-4 text-left font-semibold border-b">Class Name</th>
+                        </tr>
+                    </thead>
+                    <tbody id="class-list">
+                        <!-- Class items will be populated here dynamically -->
+                    </tbody>
+                </table>
+            </div>
         </div>
 
     </div>
 
+    <!-- jQuery & DataTables -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
@@ -36,38 +46,35 @@
                 const response = await fetch('/list_classes');
                 const data = await response.json();
                 const classes = data.classes;
-
                 console.log('Classes:', classes);
 
-                // Get table body
                 const classList = document.getElementById('class-list');
-                classList.innerHTML = ''; // Ensure it's empty before populating
+                classList.innerHTML = ''; // Clear list before appending
 
                 classes.forEach((className) => {
                     const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-100';
+                    row.className = 'hover:bg-gray-50';
 
                     const cell = document.createElement('td');
-                    cell.className = 'py-2 px-4 border-b';
+                    cell.className = 'py-3 px-4 border-b text-blue-500 hover:text-blue-600 transition duration-200';
 
-                    // Create a link for each class name
                     const link = document.createElement('a');
                     link.href = `/${className}`;
                     link.textContent = className;
-                    link.className = 'text-blue-500 hover:underline';
+                    link.className = 'underline';
 
                     cell.appendChild(link);
                     row.appendChild(cell);
                     classList.appendChild(row);
                 });
 
-                // Initialize DataTable after populating the table
+                // Initialize DataTable
                 const table = $('#classTable').DataTable({
                     paging: false,
                     info: false,
                     searching: true,
-                    dom: 't', // Only show table
-                    destroy: true // Allow reinitialization
+                    dom: 't', // Table only
+                    destroy: true
                 });
 
                 // Search functionality
@@ -80,6 +87,7 @@
             }
         });
     </script>
+
 </body>
 
 {% endblock %}

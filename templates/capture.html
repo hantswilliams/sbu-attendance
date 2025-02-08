@@ -237,6 +237,20 @@
             }
         }
     </script>
+
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const url = window.location.href;
+            const classNameInput = document.getElementById('class_name');
+            if (url.includes('/test')) {
+                classNameInput.readOnly = false;
+            } else {
+                classNameInput.readOnly = true;
+            }
+        });
+    </script>
+
 </head>
 
 
@@ -265,6 +279,7 @@
                         type="text" 
                         id="class_name" 
                         name="class_name" 
+                        readonly 
                         required 
                         class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700"
                         placeholder="Enter the class name"
