@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Class{% endblock %}
+
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Class</title>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-900">
+
+    <!-- create div that is center horizontally-->
+    <div class="flex items-center justify-center p-6">
+
+        <div class="w-full max-w-md p-4 bg-white rounded-lg shadow-md">
+            <form id="createClassForm" class="space-y-4">
+                <div>
+                    <label for="class_name" class="block text-sm font-medium text-gray-600">Class Name</label>
+                    <input 
+                        type="text" 
+                        id="class_name" 
+                        name="class_name" 
+                        required 
+                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-red-500 focus:border-red-500 text-gray-700"
+                        placeholder="Enter the class name"
+                    >
+                </div>
+                <button 
+                    type="submit" 
+                    class="w-full bg-red-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-700 shadow-md transition duration-300"
+                >
+                    Create Class
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    <script>
+        document.getElementById('createClassForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const className = document.getElementById('class_name').value.trim();
+            
+            // Validate class name
+            const validClassName = /^[a-zA-Z0-9_]+$/.test(className);
+            if (!validClassName) {
+                alert('Class name can only contain letters, numbers, and underscores, and no spaces.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/create_class', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({ class_name: className })
+                });
+                const result = await response.json();
+                alert(result.message || result.error);
+                if (response.ok) {
+                    alert('✅ Class pushed successfully to Airtable!');
+                    window.location.reload();
+                }
+            } catch (error) {
+                alert('❌ An error occurred. Please try again.');
+                console.error("❌ Error creating class:", error);
+            }
+        });
+    </script>
+</body>
+
+{% endblock %}
