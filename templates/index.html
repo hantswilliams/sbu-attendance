@@ -48,15 +48,17 @@
 
         const human = new Human.Human(humanConfig);
         let video, canvas, context;
-        let enableCameraButton, submitButton, toggleDrawButton, loadingSpinner;
+        let enableCameraButton, disableCameraButton, submitButton, toggleDrawButton, loadingSpinner;
         let userIP = '';
         let drawEnabled = true;
+        let stream;
 
         window.addEventListener('DOMContentLoaded', async () => {
             video = document.getElementById('video');
             canvas = document.getElementById('canvas');
             context = canvas.getContext('2d');
             enableCameraButton = document.getElementById('enableCameraButton');
+            disableCameraButton = document.getElementById('disableCameraButton');
             submitButton = document.getElementById('submitButton');
             toggleDrawButton = document.getElementById('toggleDrawButton');
             loadingSpinner = document.getElementById('loadingSpinner');
@@ -64,6 +66,7 @@
             await fetchIP();
 
             enableCameraButton.addEventListener('click', startVideo);
+            disableCameraButton.addEventListener('click', stopVideo);
             toggleDrawButton.addEventListener('click', toggleDraw);
             document.getElementById('photoForm').addEventListener('submit', captureAndSubmit);
         });
@@ -82,10 +85,11 @@
         async function startVideo() {
             try {
                 console.log("🎥 Requesting camera access...");
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
                 video.srcObject = stream;
                 video.classList.remove('hidden');
                 enableCameraButton.classList.add('hidden');
+                disableCameraButton.classList.remove('hidden');
                 submitButton.classList.remove('hidden');
                 toggleDrawButton.classList.remove('hidden');
 
@@ -100,6 +104,17 @@
             } catch (error) {
                 alert('❌ Unable to access the camera. Please check your device settings.');
                 console.error("❌ Error starting camera:", error);
+            }
+        }
+
+        function stopVideo() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.classList.add('hidden');
+                enableCameraButton.classList.remove('hidden');
+                disableCameraButton.classList.add('hidden');
+                submitButton.classList.add('hidden');
+                toggleDrawButton.classList.add('hidden');
             }
         }
 
@@ -232,6 +247,14 @@
                 class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-700 shadow-md transition duration-300"
             >
                 Enable Camera
+            </button>
+
+            <button 
+                type="button" 
+                id="disableCameraButton" 
+                class="w-full bg-red-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-700 shadow-md transition duration-300 hidden"
+            >
+                Disable Camera
             </button>
 
             <button 
