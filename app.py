@@ -100,6 +100,9 @@ def upload():
 
         if not photo_data:
             photo_url = None
+            emotion = "No face detected"  # Update emotion to 'No face detected' if no photo
+            emotion_confidence = None  # Update confidence to 0 if no photo
+            age = None  # Update age to None if no photo
         else:
             # Decode the base64 photo and upload it to Cloudinary
             photo_binary = photo_data.split(',')[1]  # Remove the `data:image/...;base64,` prefix

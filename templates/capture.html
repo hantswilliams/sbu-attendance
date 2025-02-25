@@ -176,48 +176,50 @@
             }
 
             try {
-                // Capture the emotion before submitting
-                const results = await human.detect(video);
-
-                console.log("📊 [DEBUG] Raw Detection Results:", results);
-
-                let detectedEmotion = "Unknown";
-                let emotionconfidenceScore = "0%";
-
-                if (results.face.length > 0 && results.face[0].emotion.length > 0) {
-                    // Sort emotions by confidence and pick the most probable one
-                    const topEmotion = results.face[0].emotion.sort((a, b) => b.score - a.score)[0];
-                    detectedEmotion = topEmotion.emotion;
-                    emotionconfidenceScore = `${(topEmotion.score * 100).toFixed(2)}%`;  // Convert to percentage
-                    console.log(`🧠 Detected Emotion: ${detectedEmotion} (${emotionconfidenceScore} confidence)`);
-                } else {
-                    console.warn("⚠️ No emotion detected...");
-                }
-
-                // Capture the age before submitting
-                let detectedAge = "Unknown";
-                if (results.face.length > 0 && results.face[0].age > 0) {
-                    detectedAge = results.face[0].age;
-                    console.log(`👴 Detected Age: ${detectedAge}`);
-                } else {
-                    console.warn("⚠️ No age detected...");
-                }
-
-                // Capture image
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                const photoData = canvas.toDataURL('image/jpeg');
                 const formData = new FormData();
-
                 formData.append('email', email);
-                formData.append('photo', photoData);
                 formData.append('ip', userIP);
-                formData.append('emotion', detectedEmotion);
-                formData.append('emotion_confidence', emotionconfidenceScore);
-                formData.append('age', detectedAge);
                 formData.append('class_name', className);
+
+                if (stream) {
+                    // Capture the emotion before submitting
+                    const results = await human.detect(video);
+
+                    console.log("📊 [DEBUG] Raw Detection Results:", results);
+
+                    let detectedEmotion = "Unknown";
+                    let emotionconfidenceScore = "0%";
+
+                    if (results.face.length > 0 && results.face[0].emotion.length > 0) {
+                        // Sort emotions by confidence and pick the most probable one
+                        const topEmotion = results.face[0].emotion.sort((a, b) => b.score - a.score)[0];
+                        detectedEmotion = topEmotion.emotion;
+                        emotionconfidenceScore = `${(topEmotion.score * 100).toFixed(2)}%`;  // Convert to percentage
+                        console.log(`🧠 Detected Emotion: ${detectedEmotion} (${emotionconfidenceScore} confidence)`);
+                    } else {
+                        console.warn("⚠️ No emotion detected...");
+                    }
+
+                    // Capture the age before submitting
+                    let detectedAge = "Unknown";
+                    if (results.face.length > 0 && results.face[0].age > 0) {
+                        detectedAge = results.face[0].age;
+                        console.log(`👴 Detected Age: ${detectedAge}`);
+                    } else {
+                        console.warn("⚠️ No age detected...");
+                    }
+
+                    // Capture image
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    const photoData = canvas.toDataURL('image/jpeg');
+                    formData.append('photo', photoData);
+                    formData.append('emotion', detectedEmotion);
+                    formData.append('emotion_confidence', emotionconfidenceScore);
+                    formData.append('age', detectedAge);
+                }
 
                 console.log("📤 Sending captured image and user details to server...");
                 const response = await fetch('/upload', {
@@ -323,7 +325,7 @@
                 <button 
                     type="submit" 
                     id="submitButton" 
-                    class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 shadow-md transition duration-300 hidden"
+                    class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 shadow-md transition duration-300"
                 >
                     Capture and Submit
                 </button>
