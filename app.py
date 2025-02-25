@@ -95,16 +95,19 @@ def upload():
                 Confidence: {emotion_confidence}, \
                 Age: {age}, Class: {class_name}")
 
-        if not email or not photo_data or not class_name:
-            return jsonify({"error": "Email, photo, and class name are required."}), 400
+        if not email or not class_name:
+            return jsonify({"error": "Email and class name are required."}), 400
 
-        # Decode the base64 photo and upload it to Cloudinary
-        photo_binary = photo_data.split(',')[1]  # Remove the `data:image/...;base64,` prefix
-        response = cloudinary.uploader.upload(
-            f"data:image/jpeg;base64,{photo_binary}",
-            folder="uploads"
-        )
-        photo_url = response.get("secure_url")  # Publicly accessible URL from Cloudinary
+        if not photo_data:
+            photo_url = None
+        else:
+            # Decode the base64 photo and upload it to Cloudinary
+            photo_binary = photo_data.split(',')[1]  # Remove the `data:image/...;base64,` prefix
+            response = cloudinary.uploader.upload(
+                f"data:image/jpeg;base64,{photo_binary}",
+                folder="uploads"
+            )
+            photo_url = response.get("secure_url")  # Publicly accessible URL from Cloudinary
 
         # Prepare the data payload for Airtable
         airtable_data = {
